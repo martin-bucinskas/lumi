@@ -8,3 +8,4 @@ keywords = ["lumi", "os"]
 edition = "2021"
 
 [dependencies]
+bootloader = "0.9.22"
