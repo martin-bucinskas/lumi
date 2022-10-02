@@ -1,0 +1,16 @@
+[package]
+name = "lumi"
+version = "0.1.0"
+authors = ["Martin <martin@martinb.dev>"]
+readme = "README.md"
+repository = "https://github.com/martin-bucinskas/lumi"
+keywords = ["lumi", "os"]
+edition = "2021"
+
+[profile.dev]
+panic = "abort"
+
+[profile.release]
+panic = "abort"
+
+[dependencies]
