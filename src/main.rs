@@ -1,25 +1,46 @@
 #![no_std]
 #![no_main]
+#![feature(custom_test_frameworks)]
+#![test_runner(lumi::test_runner)]
+#![reexport_test_harness_main = "test_main"]
 
 use core::panic::PanicInfo;
-
-static LUMI: &[u8] = b"Lumi";
-
-#[panic_handler]
-fn panic(_info: &PanicInfo) -> ! {
-  loop {}
-}
+use lumi::println;
+// use ansi_parser::{AnsiParser, Output};
 
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
-  let vga_buffer = 0xb8000 as *mut u8;
+  println!("# Lumi v{} #", "0.1.0");
 
-  for (i, &byte) in LUMI.iter().enumerate() {
-    unsafe {
-      *vga_buffer.offset(i as isize * 2) = byte;
-      *vga_buffer.offset(i as isize * 2 + 1) = 0xb;
-    }
-  }
+  #[cfg(test)]
+  test_main();
+
+  // let parsed: Vec<Output> = "This is \u{1b}[3Asome text!"
+  //   .ansi_parse()
+  //   .take(2)
+  //   .collect();
+
+  panic!("Panic - something went wrong...");
 
   loop {}
+}
+
+#[cfg(not(test))]
+#[panic_handler]
+fn panic(info: &PanicInfo) -> ! {
+  println!("{}", info);
+  loop {}
+}
+
+// -------------------------------------------------------------
+
+#[cfg(test)]
+#[panic_handler]
+fn panic(info: &PanicInfo) -> ! {
+  lumi::test_panic_handler(info)
+}
+
+#[test_case]
+fn trivial_assertion() {
+  assert_eq!(1, 1);
 }

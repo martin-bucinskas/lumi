@@ -15,9 +15,19 @@ connect:
 	sleep 2
 	tools/vncviewer64-1.12.0.exe 127.0.0.1:5900
 
+.PHONY: late_connect
+late_connect:
+	echo "Connecting..."
+	sleep 10
+	tools/vncviewer64-1.12.0.exe 127.0.0.1:5900
+
 .PHONY: run_and_connect
 run_and_connect:
 	$(MAKE) -j2 run connect
 
 .PHONY: dev
 dev: build run_and_connect
+
+.PHONY: test
+test:
+	cargo test
