@@ -33,21 +33,18 @@ pub extern "C" fn _start() -> ! {
   #[cfg(test)]
   test_main();
 
-  // let parsed: Vec<Output> = "This is \u{1b}[3Asome text!"
-  //   .ansi_parse()
-  //   .take(2)
-  //   .collect();
+  // panic!("Panic - something went wrong...");
 
-  panic!("Panic - something went wrong...");
+  println!(".");
 
-  loop {}
+  lumi::hlt_loop();
 }
 
 #[cfg(not(test))]
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
   println!("{}", info);
-  loop {}
+  lumi::hlt_loop();
 }
 
 // -------------------------------------------------------------
