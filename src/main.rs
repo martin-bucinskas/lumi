@@ -5,37 +5,40 @@
 #![reexport_test_harness_main = "test_main"]
 
 use core::panic::PanicInfo;
+use bootloader::{BootInfo, entry_point};
+use x86_64::registers::control::Cr3;
+use x86_64::structures::paging::{Page, PageTable, Translate};
+use x86_64::VirtAddr;
+use lumi::memory;
+use lumi::memory::BootInfoFrameAllocator;
 use lumi::println;
-// use ansi_parser::{AnsiParser, Output};
 
-#[no_mangle]
-pub extern "C" fn _start() -> ! {
+entry_point!(kernel_main);
+
+fn kernel_main(boot_info: &'static BootInfo) -> ! {
+  use lumi::memory::BootInfoFrameAllocator;
+
   println!("# Lumi v{} #", "0.1.0");
 
   println!("Initialising...");
   lumi::init();
 
-  // x86_64::instructions::interrupts::int3(); // -> test breakpoint
+  let phys_mem_offset = VirtAddr::new(boot_info.physical_memory_offset);
+  let mut mapper = unsafe { memory::init(phys_mem_offset) };
+  let mut frame_allocator = unsafe {
+    BootInfoFrameAllocator::init(&boot_info.memory_map)
+  };
 
-  // trigger a page fault
+  // let page = Page::containing_address(VirtAddr::new(0));
+  // memory::create_example_mapping(page, &mut mapper, &mut frame_allocator);
+  //
+  // let page_ptr: *mut u64 = page.start_address().as_mut_ptr();
   // unsafe {
-  //   *(0xdeadbeef as *mut u64) = 42;
-  // }
-
-  fn stack_overflow() {
-    // for each recursion the return address is pushed to stack
-    stack_overflow();
-  }
-
-  // trigger a stack overflow
-  // stack_overflow();
+  //   page_ptr.offset(400).write_volatile(0xf021_f077_f065_f04e);
+  // };
 
   #[cfg(test)]
   test_main();
-
-  // panic!("Panic - something went wrong...");
-
-  println!(".");
 
   lumi::hlt_loop();
 }

@@ -6,11 +6,13 @@
 #![reexport_test_harness_main = "test_main"]
 
 use core::panic::PanicInfo;
+use bootloader::BootInfo;
 
 pub mod interrupts;
 pub mod gdt;
 pub mod serial;
 pub mod vga_buffer;
+pub mod memory;
 
 pub fn init() {
   println!("Setting up GDT...");
@@ -79,7 +81,7 @@ pub fn exit_qemu(exit_code: QemuExitCode) {
 
 #[cfg(test)]
 #[no_mangle]
-pub extern "C" fn _start() -> ! {
+pub extern "C" fn test_kernel_main(_boot_info: &'static BootInfo) -> ! {
   init();
   test_main();
   hlt_loop();
