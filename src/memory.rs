@@ -1,8 +1,7 @@
 use bootloader::bootinfo::{MemoryMap, MemoryRegionType};
-use x86_64::structures::paging::{FrameAllocator, Mapper, OffsetPageTable, Page, PageTable, PhysFrame, RecursivePageTable, Size4KiB};
+use x86_64::structures::paging::{FrameAllocator, OffsetPageTable, PageTable, PhysFrame, Size4KiB};
 use x86_64::{VirtAddr, PhysAddr};
 use x86_64::registers::control::Cr3;
-use x86_64::structures::paging::page_table::FrameError;
 use crate::println;
 
 pub struct EmptyFrameAllocator;
@@ -49,8 +48,6 @@ pub unsafe fn init(physical_memory_offset: VirtAddr) -> OffsetPageTable<'static>
 }
 
 unsafe fn active_level_4_table(physical_memory_offset: VirtAddr) -> &'static mut PageTable {
-  use x86_64::registers::control::Cr3;
-
   let (level_4_table_frame, _flags) = Cr3::read();
   let phys = level_4_table_frame.start_address();
   let virt = physical_memory_offset + phys.as_u64();

@@ -2,9 +2,6 @@ use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame, Pag
 use lazy_static::lazy_static;
 use pic8259::ChainedPics;
 use spin;
-use spin::Mutex;
-use x86_64::instructions::port::Port;
-use x86_64::registers::control::Cr2;
 use crate::{hlt_loop, print, println};
 use crate::gdt;
 

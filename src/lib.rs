@@ -2,6 +2,8 @@
 #![cfg_attr(test, no_main)]
 #![feature(custom_test_frameworks)]
 #![feature(abi_x86_interrupt)]
+#![feature(alloc_error_handler)]
+#![feature(const_mut_refs)]
 #![test_runner(crate::test_runner)]
 #![reexport_test_harness_main = "test_main"]
 
@@ -13,6 +15,9 @@ pub mod gdt;
 pub mod serial;
 pub mod vga_buffer;
 pub mod memory;
+pub mod allocator;
+
+extern crate alloc;
 
 pub fn init() {
   println!("Setting up GDT...");
@@ -31,6 +36,11 @@ pub fn hlt_loop() -> ! {
   loop {
     x86_64::instructions::hlt();
   }
+}
+
+#[alloc_error_handler]
+fn alloc_error_handler(layout: alloc::alloc::Layout) -> ! {
+  panic!("allocation error: {:?}", layout)
 }
 
 pub trait Testable {

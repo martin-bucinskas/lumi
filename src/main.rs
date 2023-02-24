@@ -4,20 +4,22 @@
 #![test_runner(lumi::test_runner)]
 #![reexport_test_harness_main = "test_main"]
 
+extern crate alloc;
+
+use alloc::boxed::Box;
+use alloc::rc::Rc;
+use alloc::vec;
+use alloc::vec::Vec;
 use core::panic::PanicInfo;
 use bootloader::{BootInfo, entry_point};
-use x86_64::registers::control::Cr3;
-use x86_64::structures::paging::{Page, PageTable, Translate};
 use x86_64::VirtAddr;
-use lumi::memory;
+use lumi::{allocator, memory};
 use lumi::memory::BootInfoFrameAllocator;
 use lumi::println;
 
 entry_point!(kernel_main);
 
 fn kernel_main(boot_info: &'static BootInfo) -> ! {
-  use lumi::memory::BootInfoFrameAllocator;
-
   println!("# Lumi v{} #", "0.1.0");
 
   println!("Initialising...");
@@ -29,13 +31,24 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     BootInfoFrameAllocator::init(&boot_info.memory_map)
   };
 
-  // let page = Page::containing_address(VirtAddr::new(0));
-  // memory::create_example_mapping(page, &mut mapper, &mut frame_allocator);
-  //
-  // let page_ptr: *mut u64 = page.start_address().as_mut_ptr();
-  // unsafe {
-  //   page_ptr.offset(400).write_volatile(0xf021_f077_f065_f04e);
-  // };
+  allocator::init_heap(&mut mapper, &mut frame_allocator)
+    .expect("heap initialization failed");
+
+  let heap_value = Box::new(41);
+  println!("heap_value at {:p}", heap_value);
+
+  let mut vec = Vec::new();
+  for i in 0..500 {
+    vec.push(i);
+  }
+
+  println!("vec at {:p}", vec.as_slice());
+
+  let reference_counted = Rc::new(vec![1, 2, 3]);
+  let cloned_reference = reference_counted.clone();
+  println!("current reference count is {}", Rc::strong_count(&cloned_reference));
+  core::mem::drop(reference_counted);
+  println!("reference count is {} now", Rc::strong_count(&cloned_reference));
 
   #[cfg(test)]
   test_main();
